@@ -8,9 +8,9 @@ TESTSOURCES = ares-test-main.cc	\
   ares-test-parse-a.cc			\
   ares-test-parse-aaaa.cc		\
   ares-test-parse-caa.cc		\
-  ares-test-parse-mx.cc			\
+  ares-test-parse-mx.cc		\
   ares-test-parse-naptr.cc		\
-  ares-test-parse-ns.cc			\
+  ares-test-parse-ns.cc		\
   ares-test-parse-ptr.cc		\
   ares-test-parse-soa.cc		\
   ares-test-parse-soa-any.cc		\
