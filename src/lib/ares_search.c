@@ -45,8 +45,9 @@ struct search_query {
   size_t               names_cnt;
 
   /* State tracking progress through the search query */
-  size_t               next_name_idx; /* next name index being attempted */
-  size_t      timeouts;        /* number of timeouts we saw for this request */
+  size_t      next_name_idx; /* next name index being attempted */
+  size_t      timeouts;      /* number of timeouts we saw for this request */
+  ares_bool_t as_is_first;   /* original name is first in the search order */
   ares_bool_t ever_got_nodata; /* did we ever get ARES_ENODATA along the way? */
 };
 
@@ -108,8 +109,8 @@ static void search_callback(void *arg, ares_status_t status, size_t timeouts,
   struct search_query *squery  = (struct search_query *)arg;
   ares_channel_t      *channel = squery->channel;
 
-  ares_status_t        mystatus;
-  ares_bool_t          skip_cleanup = ARES_FALSE;
+  ares_status_t mystatus;
+  ares_bool_t   skip_cleanup = ARES_FALSE;
 
   squery->timeouts += timeouts;
 
@@ -123,6 +124,14 @@ static void search_callback(void *arg, ares_status_t status, size_t timeouts,
 
   switch (mystatus) {
     case ARES_ENODATA:
+      /* If the original name was tried first and exists, do not reinterpret it
+       * under a search suffix.  NODATA means the name exists but has no record
+       * of the requested type, unlike NXDOMAIN which is eligible for search. */
+      if (squery->as_is_first && squery->next_name_idx == 1) {
+        end_squery(squery, mystatus, dnsrec);
+        return;
+      }
+      break;
     case ARES_ENOTFOUND:
       break;
     case ARES_ESERVFAIL:
@@ -359,6 +368,7 @@ static ares_status_t ares_search_int(ares_channel_t          *channel,
   squery->callback        = callback;
   squery->arg             = arg;
   squery->timeouts        = 0;
+  squery->as_is_first     = ARES_FALSE;
   squery->ever_got_nodata = ARES_FALSE;
 
   status =
@@ -366,6 +376,9 @@ static ares_status_t ares_search_int(ares_channel_t          *channel,
   if (status != ARES_SUCCESS) {
     goto fail;
   }
+
+  squery->as_is_first =
+    squery->names_cnt > 0 && ares_streq(squery->names[0], name);
 
   status = ares_search_next(channel, squery, &skip_cleanup);
   if (status != ARES_SUCCESS) {
