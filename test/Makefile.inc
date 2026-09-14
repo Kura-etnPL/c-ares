@@ -22,6 +22,7 @@ TESTSOURCES = ares-test-main.cc	\
   ares-test-mock.cc			\
   ares-test-mock-ai.cc			\
   ares-test-mock-et.cc		\
+  ares-test-search.cc			\
   ares-test-internal.cc		\
   dns-proto.cc				\
   dns-proto-test.cc
