@@ -45,9 +45,9 @@ struct search_query {
   size_t               names_cnt;
 
   /* State tracking progress through the search query */
-  size_t      next_name_idx; /* next name index being attempted */
-  size_t      timeouts;      /* number of timeouts we saw for this request */
-  ares_bool_t as_is_first;   /* original name is first in the search order */
+  size_t               next_name_idx; /* next name index being attempted */
+  size_t      timeouts;        /* number of timeouts we saw for this request */
+  ares_bool_t as_is_first;     /* original name is first in the search order */
   ares_bool_t ever_got_nodata; /* did we ever get ARES_ENODATA along the way? */
 };
 
@@ -109,8 +109,8 @@ static void search_callback(void *arg, ares_status_t status, size_t timeouts,
   struct search_query *squery  = (struct search_query *)arg;
   ares_channel_t      *channel = squery->channel;
 
-  ares_status_t mystatus;
-  ares_bool_t   skip_cleanup = ARES_FALSE;
+  ares_status_t        mystatus;
+  ares_bool_t          skip_cleanup = ARES_FALSE;
 
   squery->timeouts += timeouts;
 
